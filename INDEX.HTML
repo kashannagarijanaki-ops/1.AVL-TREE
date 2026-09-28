@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVL Tree & B+ Tree Visualizer</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+header {
+    text-align: center;
+    padding: 22px;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    color: #38bdf8;
+}
+
+header p {
+    margin: 0;
+    color: #94a3b8;
+}
+
+.container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 25px auto;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #334155;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.tab.active {
+    background: #0284c7;
+}
+
+.panel {
+    display: none;
+}
+
+.panel.active {
+    display: block;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px;
+    background: #1e293b;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+input {
+    width: 180px;
+    padding: 11px;
+    border: 1px solid #475569;
+    border-radius: 7px;
+    background: #0f172a;
+    color: white;
+    font-size: 15px;
+}
+
+button.action {
+    padding: 11px 17px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    color: white;
+    background: #2563eb;
+    font-weight: bold;
+}
+
+button.action:hover {
+    opacity: 0.85;
+}
+
+button.insert {
+    background: #16a34a;
+}
+
+button.delete {
+    background: #dc2626;
+}
+
+button.search {
+    background: #9333ea;
+}
+
+button.reset {
+    background: #64748b;
+}
+
+.info {
+    padding: 12px 16px;
+    background: #172554;
+    border-left: 4px solid #38bdf8;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.visualizer {
+    position: relative;
+    min-height: 600px;
+    background: #020617;
+    border-radius: 12px;
+    overflow: auto;
+    padding: 30px;
+}
+
+svg {
+    display: block;
+    margin: auto;
+}
+
+.node {
+    transition: all 0.3s ease;
+}
+
+.node circle {
+    fill: #2563eb;
+    stroke: #7dd3fc;
+    stroke-width: 2;
+}
+
+.node text {
+    fill: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.node.highlight circle {
+    fill: #f59e0b;
+    stroke: #fde68a;
+}
+
+.edge {
+    stroke: #64748b;
+    stroke-width: 2;
+}
+
+.bplus-node rect {
+    fill: #166534;
+    stroke: #86efac;
+    stroke-width: 2;
+    rx: 8;
+}
+
+.bplus-node text {
+    fill: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.leaf-link {
+    stroke: #f59e0b;
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+}
+
+.status {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 7px;
+    background: #1e293b;
+    color: #cbd5e1;
+}
+
+.legend {
+    display: flex;
+    gap: 25px;
+    margin-top: 15px;
+    color: #94a3b8;
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.blue {
+    background: #2563eb;
+}
+
+.green {
+    background: #166534;
+}
+
+.orange {
+    background: #f59e0b;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Tree Data Structure Visualizer</h1>
+    <p>AVL Tree and B+ Tree — Interactive Visualization</p>
+</header>
+
+<div class="container">
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTree('avl')">
+            AVL Tree
+        </button>
+
+        <button class="tab" onclick="showTree('bplus')">
+            B+ Tree
+        </button>
+    </div>
+
+    <!-- AVL TREE -->
+    <section id="avlPanel" class="panel active">
+
+        <div class="controls">
+            <input id="avlInput"
+                   type="number"
+                   placeholder="Enter value">
+
+            <button class="action insert" onclick="insertAVL()">
+                Insert
+            </button>
+
+            <button class="action delete" onclick="deleteAVL()">
+                Delete
+            </button>
+
+            <button class="action search" onclick="searchAVL()">
+                Search
+            </button>
+
+            <button class="action reset" onclick="resetAVL()">
+                Reset
+            </button>
+        </div>
+
+        <div class="info">
+            AVL Tree maintains a balance factor of -1, 0, or +1
+            for every node.
+        </div>
+
+        <div class="visualizer">
+            <svg id="avlSVG" width="1200" height="600"></svg>
+        </div>
+
+        <div id="avlStatus" class="status">
+            Ready.
+        </div>
+
+        <div class="legend">
+            <span><i class="dot blue"></i> AVL Node</span>
+            <span><i class="dot orange"></i> Search Result</span>
+        </div>
+
+    </section>
+
+
+    <!-- B+ TREE -->
+    <section id="bplusPanel" class="panel">
+
+        <div class="controls">
+            <input id="bplusInput"
+                   type="number"
+                   placeholder="Enter value">
+
+            <button class="action insert" onclick="insertBPlus()">
+                Insert
+            </button>
+
+            <button class="action delete" onclick="deleteBPlus()">
+                Delete
+            </button>
+
+            <button class="action search" onclick="searchBPlus()">
+                Search
+            </button>
+
+            <button class="action reset" onclick="resetBPlus()">
+                Reset
+            </button>
+        </div>
+
+        <div class="info">
+            B+ Tree: internal nodes contain separator keys,
+            while actual data keys are stored in leaf nodes.
+        </div>
+
+        <div class="visualizer">
+            <svg id="bplusSVG" width="1200" height="600"></svg>
+        </div>
+
+        <div id="bplusStatus" class="status">
+            Ready.
+        </div>
+
+        <div class="legend">
+            <span><i class="dot green"></i> B+ Tree Node</span>
+            <span><i class="dot orange"></i> Leaf Link</span>
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   TAB SWITCHING
+========================================================= */
+
+function showTree(type) {
+
+    document.querySelectorAll(".panel")
+        .forEach(p => p.classList.remove("active"));
+
+    document.querySelectorAll(".tab")
+        .forEach(t => t.classList.remove("active"));
+
+    if (type === "avl") {
+        document.getElementById("avlPanel")
+            .classList.add("active");
+
+        document.querySelectorAll(".tab")[0]
+            .classList.add("active");
+    } else {
+        document.getElementById("bplusPanel")
+            .classList.add("active");
+
+        document.querySelectorAll(".tab")[1]
+            .classList.add("active");
+    }
+}
+
+
+/* =========================================================
+   AVL TREE
+========================================================= */
+
+class AVLNode {
+
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+    }
+}
+
+let avlRoot = null;
+
+
+function height(node) {
+    return node ? node.height : 0;
+}
+
+
+function getBalance(node) {
+    return node
+        ? height(node.left) - height(node.right)
+        : 0;
+}
+
+
+function updateHeight(node) {
+    node.height =
+        1 + Math.max(
+            height(node.left),
+            height(node.right)
+        );
+}
+
+
+/* ---------- Rotations ---------- */
+
+function rotateRight(y) {
+
+    const x = y.left;
+    const T2 = x.right;
+
+    x.right = y;
+    y.left = T2;
+
+    updateHeight(y);
+    updateHeight(x);
+
+    return x;
+}
+
+
+function rotateLeft(x) {
+
+    const y = x.right;
+    const T2 = y.left;
+
+    y.left = x;
+    x.right = T2;
+
+    updateHeight(x);
+    updateHeight(y);
+
+    return y;
+}
+
+
+/* ---------- AVL Insert ---------- */
+
+function avlInsert(root, value) {
+
+    if (!root)
+        return new AVLNode(value);
+
+    if (value < root.value) {
+
+        root.left =
+            avlInsert(root.left, value);
+
+    } else if (value > root.value) {
+
+        root.right =
+            avlInsert(root.right, value);
+
+    } else {
+
+        return root;
+    }
+
+    updateHeight(root);
+
+    const balance = getBalance(root);
+
+
+    // LL
+    if (balance > 1 &&
+        value < root.left.value) {
+
+        return rotateRight(root);
+    }
+
+
+    // RR
+    if (balance < -1 &&
+        value > root.right.value) {
+
+        return rotateLeft(root);
+    }
+
+
+    // LR
+    if (balance > 1 &&
+        value > root.left.value) {
+
+        root.left =
+            rotateLeft(root.left);
+
+        return rotateRight(root);
+    }
+
+
+    // RL
+    if (balance < -1 &&
+        value < root.right.value) {
+
+        root.right =
+            rotateRight(root.right);
+
+        return rotateLeft(root);
+    }
+
+    return root;
+}
+
+
+/* ---------- AVL Delete ---------- */
+
+function minValueNode(node) {
+
+    let current = node;
+
+    while (current.left)
+        current = current.left;
+
+    return current;
+}
+
+
+function avlDelete(root, value) {
+
+    if (!root)
+        return null;
+
+    if (value < root.value) {
+
+        root.left =
+            avlDelete(root.left, value);
+
+    } else if (value > root.value) {
+
+        root.right =
+            avlDelete(root.right, value);
+
+    } else {
+
+        if (!root.left || !root.right) {
+
+            root =
+                root.left || root.right;
+
+        } else {
+
+            const successor =
+                minValueNode(root.right);
+
+            root.value = successor.value;
+
+            root.right =
+                avlDelete(
+                    root.right,
+                    successor.value
+                );
+        }
+    }
+
+    if (!root)
+        return null;
+
+    updateHeight(root);
+
+    const balance = getBalance(root);
+
+
+    // LL
+    if (balance > 1 &&
+        getBalance(root.left) >= 0) {
+
+        return rotateRight(root);
+    }
+
+
+    // LR
+    if (balance > 1 &&
+        getBalance(root.left) < 0) {
+
+        root.left =
+            rotateLeft(root.left);
+
+        return rotateRight(root);
+    }
+
+
+    // RR
+    if (balance < -1 &&
+        getBalance(root.right) <= 0) {
+
+        return rotateLeft(root);
+    }
+
+
+    // RL
+    if (balance < -1 &&
+        getBalance(root.right) > 0) {
+
+        root.right =
+            rotateRight(root.right);
+
+        return rotateLeft(root);
+    }
+
+    return root;
+}
+
+
+/* ---------- AVL Drawing ---------- */
+
+function drawAVL(highlight = null) {
+
+    const svg =
+        document.getElementById("avlSVG");
+
+    svg.innerHTML = "";
+
+    if (!avlRoot)
+        return;
+
+    let positions = [];
+    let edges = [];
+
+    let index = 0;
+
+
+    function calculate(node, depth = 0) {
+
+        if (!node)
+            return null;
+
+        const left = calculate(node.left, depth + 1);
+
+        const current = {
+            node: node,
+            x: index * 80 + 60,
+            y: depth * 100 + 60
+        };
+
+        index++;
+
+        const right =
+            calculate(node.right, depth + 1);
+
+        positions.push(current);
+
+        if (left)
+            edges.push([current, left]);
+
+        if (right)
+            edges.push([current, right]);
+
+        return current;
+    }
+
+    calculate(avlRoot);
+
+
+    const maxX =
+        Math.max(...positions.map(p => p.x), 100);
+
+    svg.setAttribute(
+        "width",
+        Math.max(1200, maxX + 100)
+    );
+
+
+    // Edges
+    edges.forEach(([parent, child]) => {
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+        line.setAttribute("x1", parent.x);
+        line.setAttribute("y1", parent.y);
+
+        line.setAttribute("x2", child.x);
+        line.setAttribute("y2", child.y);
+
+        line.setAttribute("class", "edge");
+
+        svg.appendChild(line);
+    });
+
+
+    // Nodes
+    positions.forEach(p => {
+
+        const group =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "g"
+            );
+
+        group.setAttribute("class", "node");
+
+
+        if (highlight !== null &&
+            p.node.value === highlight) {
+
+            group.classList.add("highlight");
+        }
+
+
+        const circle =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "circle"
+            );
+
+        circle.setAttribute("cx", p.x);
+        circle.setAttribute("cy", p.y);
+        circle.setAttribute("r", 25);
+
+
+        const text =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+            );
+
+        text.setAttribute("x", p.x);
+        text.setAttribute("y", p.y);
+
+        text.textContent = p.node.value;
+
+
+        group.appendChild(circle);
+        group.appendChild(text);
+
+        svg.appendChild(group);
+    });
+}
+
+
+/* ---------- AVL UI ---------- */
+
+function getAVLInput() {
+
+    const input =
+        document.getElementById("avlInput");
+
+    const value =
+        Number(input.value);
+
+    if (Number.isNaN(value)) {
+        alert("Enter a valid number.");
+        return null;
+    }
+
+    return value;
+}
+
+
+function insertAVL() {
+
+    const value = getAVLInput();
+
+    if (value === null)
+        return;
+
+    avlRoot =
+        avlInsert(avlRoot, value);
+
+    drawAVL();
+
+    document.getElementById("avlStatus")
+        .textContent =
+        `Inserted ${value}. Tree rebalanced automatically.`;
+}
+
+
+function deleteAVL() {
+
+    const value = getAVLInput();
+
+    if (value === null)
+        return;
+
+    avlRoot =
+        avlDelete(avlRoot, value);
+
+    drawAVL();
+
+    document.getElementById("avlStatus")
+        .textContent =
+        `Deleted ${value} if it existed.`;
+}
+
+
+function searchAVL() {
+
+    const value = getAVLInput();
+
+    if (value === null)
+        return;
+
+    let current = avlRoot;
+
+    while (current) {
+
+        if (current.value === value) {
+
+            drawAVL(value);
+
+            document.getElementById("avlStatus")
+                .textContent =
+                `${value} found in AVL tree.`;
+
+            return;
+        }
+
+        current =
+            value < current.value
+                ? current.left
+                : current.right;
+    }
+
+    drawAVL();
+
+    document.getElementById("avlStatus")
+        .textContent =
+        `${value} not found.`;
+}
+
+
+function resetAVL() {
+
+    avlRoot = null;
+
+    drawAVL();
+
+    document.getElementById("avlStatus")
+        .textContent = "AVL Tree reset.";
+}
+
+
+/* =========================================================
+   B+ TREE
+========================================================= */
+
+/*
+   Order = 3
+
+   Maximum children in an internal node = 3
+   Maximum keys in leaf = 2
+*/
+
+const BPLUS_ORDER = 3;
+
+
+class BPlusNode {
+
+    constructor(leaf = false) {
+
+        this.leaf = leaf;
+
+        this.keys = [];
+
+        this.children = [];
+
+        this.next = null;
+    }
+}
+
+
+let bplusRoot =
+    new BPlusNode(true);
+
+
+/* ---------- Find Leaf ---------- */
+
+function findLeaf(root, value) {
+
+    let node = root;
+
+    while (!node.leaf) {
+
+        let i = 0;
+
+        while (
+            i < node.keys.length &&
+            value >= node.keys[i]
+        ) {
+            i++;
+        }
+
+        node =
+            node.children[i];
+    }
+
+    return node;
+}
+
+
+/* ---------- Insert into B+ Tree ---------- */
+
+function insertBPlusValue(value) {
+
+    let leaf =
+        findLeaf(bplusRoot, value);
+
+
+    if (leaf.keys.includes(value))
+        return false;
+
+
+    leaf.keys.push(value);
+
+    leaf.keys.sort((a, b) => a - b);
+
+
+    if (leaf.keys.length < BPLUS_ORDER)
+        return true;
+
+
+    splitLeaf(leaf);
+
+    return true;
+}
+
+
+/* ---------- Split Leaf ---------- */
+
+function splitLeaf(leaf) {
+
+    const newLeaf =
+        new BPlusNode(true);
+
+
+    const mid =
+        Math.ceil(leaf.keys.length / 2);
+
+
+    newLeaf.keys =
+        leaf.keys.splice(mid);
+
+
+    newLeaf.next =
+        leaf.next;
+
+    leaf.next =
+        newLeaf;
+
+
+    const separator =
+        newLeaf.keys[0];
+
+
+    if (leaf === bplusRoot) {
+
+        const newRoot =
+            new BPlusNode(false);
+
+        newRoot.keys = [separator];
+
+        newRoot.children = [
+            leaf,
+            newLeaf
+        ];
+
+        bplusRoot = newRoot;
+
+        return;
+    }
+
+
+    insertIntoParent(
+        bplusRoot,
+        leaf,
+        separator,
+        newLeaf
+    );
+}
+
+
+/* ---------- Insert Into Parent ---------- */
+
+function insertIntoParent(
+    root,
+    leftChild,
+    key,
+    rightChild
+) {
+
+    const parent =
+        findParent(root, leftChild);
+
+
+    if (!parent)
+        return;
+
+
+    const index =
+        parent.children.indexOf(leftChild);
+
+
+    parent.keys.splice(
+        index,
+        0,
+        key
+    );
+
+
+    parent.children.splice(
+        index + 1,
+        0,
+        rightChild
+    );
+
+
+    if (parent.children.length >
+        BPLUS_ORDER) {
+
+        splitInternal(parent);
+    }
+}
+
+
+/* ---------- Find Parent ---------- */
+
+function findParent(root, child) {
+
+    if (root.leaf)
+        return null;
+
+
+    for (let c of root.children) {
+
+        if (c === child)
+            return root;
+
+        const result =
+            findParent(c, child);
+
+        if (result)
+            return result;
+    }
+
+    return null;
+}
+
+
+/* ---------- Split Internal ---------- */
+
+function splitInternal(node) {
+
+    const newNode =
+        new BPlusNode(false);
+
+
+    const mid =
+        Math.floor(node.keys.length / 2);
+
+
+    const separator =
+        node.keys[mid];
+
+
+    newNode.keys =
+        node.keys.splice(mid + 1);
+
+
+    newNode.children =
+        node.children.splice(mid + 1);
+
+
+    node.keys.splice(mid);
+
+
+    if (node === bplusRoot) {
+
+        const newRoot =
+            new BPlusNode(false);
+
+        newRoot.keys = [separator];
+
+        newRoot.children = [
+            node,
+            newNode
+        ];
+
+        bplusRoot = newRoot;
+
+        return;
+    }
+
+
+    insertIntoParent(
+        bplusRoot,
+        node,
+        separator,
+        newNode
+    );
+}
+
+
+/* ---------- B+ Search ---------- */
+
+function searchBPlusValue(value) {
+
+    const leaf =
+        findLeaf(bplusRoot, value);
+
+    return leaf.keys.includes(value);
+}
+
+
+/* ---------- B+ Delete ---------- */
+
+function deleteBPlusValue(value) {
+
+    const leaf =
+        findLeaf(bplusRoot, value);
+
+    const index =
+        leaf.keys.indexOf(value);
+
+    if (index === -1)
+        return false;
+
+    leaf.keys.splice(index, 1);
+
+    /*
+       Simplified deletion.
+
+       This visualization removes the key.
+       Full B+ redistribution/merge can be added
+       for a production implementation.
+    */
+
+    return true;
+}
+
+
+/* ---------- B+ Drawing ---------- */
+
+function drawBPlus(highlight = null) {
+
+    const svg =
+        document.getElementById("bplusSVG");
+
+    svg.innerHTML = "";
+
+
+    let levels = [];
+
+
+    function collect(node, depth = 0) {
+
+        if (!levels[depth])
+            levels[depth] = [];
+
+        levels[depth].push(node);
+
+
+        if (!node.leaf) {
+
+            node.children.forEach(child => {
+
+                collect(child, depth + 1);
+
+            });
+        }
+    }
+
+
+    collect(bplusRoot);
+
+
+    const nodeWidth = 100;
+    const gap = 35;
+    const levelHeight = 120;
+
+
+    levels.forEach((nodes, depth) => {
+
+        const totalWidth =
+            nodes.length *
+            (nodeWidth + gap);
+
+        const startX =
+            Math.max(
+                50,
+                (1200 - totalWidth) / 2
+            );
+
+
+        nodes.forEach((node, index) => {
+
+            node._x =
+                startX +
+                index *
+                (nodeWidth + gap);
+
+            node._y =
+                60 +
+                depth *
+                levelHeight;
+        });
+    });
+
+
+    svg.setAttribute(
+        "height",
+        Math.max(
+            600,
+            levels.length *
+            levelHeight + 100
+        )
+    );
+
+
+    // Parent-child connections
+    levels.forEach(level => {
+
+        level.forEach(node => {
+
+            if (!node.leaf) {
+
+                node.children.forEach(child => {
+
+                    const line =
+                        document.createElementNS(
+                            "http://www.w3.org/2000/svg",
+                            "line"
+                        );
+
+                    line.setAttribute(
+                        "x1",
+                        node._x + nodeWidth / 2
+                    );
+
+                    line.setAttribute(
+                        "y1",
+                        node._y + 45
+                    );
+
+                    line.setAttribute(
+                        "x2",
+                        child._x + nodeWidth / 2
+                    );
+
+                    line.setAttribute(
+                        "y2",
+                        child._y
+                    );
+
+                    line.setAttribute(
+                        "class",
+                        "edge"
+                    );
+
+                    svg.appendChild(line);
+                });
+            }
+        });
+    });
+
+
+    // Leaf links
+    let leaves = [];
+
+    function collectLeaves(node) {
+
+        if (node.leaf) {
+
+            leaves.push(node);
+            return;
+        }
+
+        node.children.forEach(
+            collectLeaves
+        );
+    }
+
+    collectLeaves(bplusRoot);
+
+
+    for (
+        let i = 0;
+        i < leaves.length - 1;
+        i++
+    ) {
+
+        const a = leaves[i];
+        const b = leaves[i + 1];
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+        line.setAttribute(
+            "x1",
+            a._x + nodeWidth
+        );
+
+        line.setAttribute(
+            "y1",
+            a._y + 25
+        );
+
+        line.setAttribute(
+            "x2",
+            b._x
+        );
+
+        line.setAttribute(
+            "y2",
+            b._y + 25
+        );
+
+        line.setAttribute(
+            "class",
+            "leaf-link"
+        );
+
+        svg.appendChild(line);
+    }
+
+
+    // Draw nodes
+    levels.forEach(level => {
+
+        level.forEach(node => {
+
+            const group =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g"
+                );
+
+            group.setAttribute(
+                "class",
+                "bplus-node"
+            );
+
+
+            const rect =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "rect"
+                );
+
+            rect.setAttribute(
+                "x",
+                node._x
+            );
+
+            rect.setAttribute(
+                "y",
+                node._y
+            );
+
+            rect.setAttribute(
+                "width",
+                nodeWidth
+            );
+
+            rect.setAttribute(
+                "height",
+                50
+            );
+
+
+            group.appendChild(rect);
+
+
+            const text =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "text"
+                );
+
+            text.setAttribute(
+                "x",
+                node._x + nodeWidth / 2
+            );
+
+            text.setAttribute(
+                "y",
+                node._y + 25
+            );
+
+
+            text.textContent =
+                node.keys.join(" | ");
+
+
+            group.appendChild(text);
+
+            svg.appendChild(group);
+        });
+    });
+
+
+    // Highlight searched value
+    if (highlight !== null) {
+
+        leaves.forEach(leaf => {
+
+            if (leaf.keys.includes(highlight)) {
+
+                const circle =
+                    document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "circle"
+                    );
+
+                circle.setAttribute(
+                    "cx",
+                    leaf._x + nodeWidth / 2
+                );
+
+                circle.setAttribute(
+                    "cy",
+                    leaf._y + 25
+                );
+
+                circle.setAttribute(
+                    "r",
+                    30
+                );
+
+                circle.setAttribute(
+                    "fill",
+                    "none"
+                );
+
+                circle.setAttribute(
+                    "stroke",
+                    "#f59e0b"
+                );
+
+                circle.setAttribute(
+                    "stroke-width",
+                    "4"
+                );
+
+                svg.appendChild(circle);
+            }
+        });
+    }
+}
+
+
+/* ---------- B+ UI ---------- */
+
+function getBPlusInput() {
+
+    const input =
+        document.getElementById("bplusInput");
+
+    const value =
+        Number(input.value);
+
+    if (Number.isNaN(value)) {
+
+        alert("Enter a valid number.");
+
+        return null;
+    }
+
+    return value;
+}
+
+
+function insertBPlus() {
+
+    const value =
+        getBPlusInput();
+
+    if (value === null)
+        return;
+
+
+    const inserted =
+        insertBPlusValue(value);
+
+
+    drawBPlus();
+
+
+    document.getElementById("bplusStatus")
+        .textContent =
+        inserted
+            ? `Inserted ${value}.`
+            : `${value} already exists.`;
+}
+
+
+function deleteBPlus() {
+
+    const value =
+        getBPlusInput();
+
+    if (value === null)
+        return;
+
+
+    const deleted =
+        deleteBPlusValue(value);
+
+
+    drawBPlus();
+
+
+    document.getElementById("bplusStatus")
+        .textContent =
+        deleted
+            ? `Deleted ${value}.`
+            : `${value} was not found.`;
+}
+
+
+function searchBPlus() {
+
+    const value =
+        getBPlusInput();
+
+    if (value === null)
+        return;
+
+
+    const found =
+        searchBPlusValue(value);
+
+
+    drawBPlus(
+        found ? value : null
+    );
+
+
+    document.getElementById("bplusStatus")
+        .textContent =
+        found
+            ? `${value} found in B+ Tree.`
+            : `${value} not found.`;
+}
+
+
+function resetBPlus() {
+
+    bplusRoot =
+        new BPlusNode(true);
+
+    drawBPlus();
+
+    document.getElementById("bplusStatus")
+        .textContent =
+        "B+ Tree reset.";
+}
+
+
+/* =========================================================
+   INITIAL DATA
+========================================================= */
+
+[
+    50, 30, 70, 20, 40,
+    60, 80, 10, 25, 35, 45
+].forEach(value => {
+
+    avlRoot =
+        avlInsert(avlRoot, value);
+});
+
+
+[
+    10, 20, 30, 40, 50,
+    60, 70, 80, 90
+].forEach(value => {
+
+    insertBPlusValue(value);
+});
+
+
+drawAVL();
+drawBPlus();
+
+</script>
+
+</body>
+</html>
